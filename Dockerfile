@@ -10,10 +10,13 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-reco
     mono-complete \
     speedtest-cli \
     neofetch \
+    procps \
     && npm install -g chalk@4 \
     && rm -rf /var/lib/apt/lists/*
 
-RUN useradd -m container
+# Buat user 'container' hanya kalau belum ada, supaya build tidak error
+RUN id -u container 2>/dev/null || useradd -m container
+
 USER container
 WORKDIR /home/container
 
