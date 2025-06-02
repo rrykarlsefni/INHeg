@@ -2,27 +2,43 @@ FROM ghcr.io/parkervcp/yolks:nodejs_24
 
 USER root
 
-# Update dan install dependencies tambahan jika perlu
-RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
+# Update & install dependencies
+RUN set -eux; \
+    apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
     ffmpeg \
     python3 python3-pip \
     php \
     gcc g++ clang make \
+    build-essential \
     mono-complete \
     speedtest-cli \
     neofetch \
     procps \
-    && npm install -g chalk@4 \
-    && rm -rf /var/lib/apt/lists/*
+    curl \
+    wget \
+    unzip \
+    htop \
+    nano \
+    git \
+    lsof \
+    dnsutils \
+    net-tools \
+    iputils-ping \
+    libtool \
+    libtool-bin \
+    || true
 
-# Pastikan user 'container' ada supaya container aman jalan
-RUN id -u container 2>/dev/null || useradd -m container
+# Install npm packages (chalk@4 + tesspeed)
+RUN set -eux; \
+    npm install -g chalk@4; \
+    if ! command -v tesspeed >/dev/null 2>&1; then \
+        npm install -g tesspeed; \
+    fi
 
+# Bersih-bersih
+RUN set -eux; \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Kembali ke user non-root
 USER container
 WORKDIR /home/container
-
-# Install dependencies dari package.json saat container start
-RUN if [ -f package.json ]; then npm install; fi
-
-# Jalankan perintah npm start
-CMD ["npm", "start"]
