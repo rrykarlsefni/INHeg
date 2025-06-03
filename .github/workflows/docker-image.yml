@@ -24,4 +24,4 @@ jobs:
       with:
         context: .
         push: true
-        tags: rrykarlsefni/nodejs24-enhanced:latest
+        tags: rrykarlsefni/inouehost:nodejs24
