@@ -6,16 +6,16 @@ RUN set -eux; \
     apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
     ffmpeg \
     python3 python3-pip \
-    pypy \
     php \
     gcc g++ clang make build-essential \
     golang \
     mono-complete \
-    speedtest-cli \
     neofetch \
     procps \
     curl wget unzip htop nano git lsof dnsutils net-tools iputils-ping libtool libtool-bin \
     zsh fish && \
+    curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | bash && \
+    apt-get install -y speedtest && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g chalk@4 fast-cli
