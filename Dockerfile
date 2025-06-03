@@ -12,14 +12,11 @@ RUN set -eux; \
     speedtest-cli \
     neofetch \
     procps \
-    curl wget unzip htop nano git lsof dnsutils net-tools iputils-ping \
-    libtool libtool-bin \
+    curl wget unzip htop nano git lsof dnsutils net-tools iputils-ping libtool libtool-bin \
     zsh fish; \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN npm install -g chalk@4 fast-speedtest
-
-RUN ln -s $(which fast-speedtest) /usr/local/bin/fast-cli
+RUN npm install -g chalk@4 fast-cli
 
 USER container
 WORKDIR /home/container
