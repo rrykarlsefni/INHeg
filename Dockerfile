@@ -14,8 +14,9 @@ RUN set -eux; \
     procps \
     curl wget unzip htop nano git lsof dnsutils net-tools iputils-ping libtool libtool-bin \
     zsh fish && \
-    pip3 install speedtest-cli && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install speedtest-cli
 
 RUN npm install -g chalk@4 fast-cli
 
