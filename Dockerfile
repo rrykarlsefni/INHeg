@@ -16,6 +16,8 @@ RUN set -eux; \
     zsh fish jq && \
     curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | bash && \
     apt-get update && apt-get install -y speedtest && \
+    echo -e '#!/bin/bash\nspeedtest --accept-license --accept-gdpr "$@"' > /usr/local/bin/speedtest && \
+    chmod +x /usr/local/bin/speedtest && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g chalk@4 fast-cli
