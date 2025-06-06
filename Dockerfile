@@ -20,6 +20,10 @@ RUN set -eux; \
     chmod +x /usr/local/bin/speedtest && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
+COPY handle/pyLib.txt /tmp/pyLib.txt
+
+RUN pip install --no-cache-dir -r /tmp/pyLib.txt && rm /tmp/pyLib.txt
+
 RUN npm install -g chalk@4 fast-cli
 
 USER container
