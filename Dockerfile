@@ -19,7 +19,6 @@ RUN set -eux; \
     curl wget unzip htop nano git lsof dnsutils net-tools iputils-ping \
     libtool libtool-bin \
     zsh fish jq && \
-    \
     curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | bash && \
     apt-get update && apt-get install -y speedtest && \
     printf '%s\n' '#!/bin/bash' 'exec /usr/bin/speedtest --accept-license --accept-gdpr "$@"' > /usr/local/bin/speedtest && \
@@ -28,8 +27,7 @@ RUN set -eux; \
 
 COPY handle/pyLib.txt /tmp/pyLib.txt
 
-RUN set -eux; \
-    python3 -m pip install --upgrade pip setuptools wheel && \
+RUN python3 -m pip install --upgrade pip setuptools wheel && \
     while IFS= read -r lib || [ -n "$lib" ]; do \
         echo "Installing $lib..." && \
         pip install --no-cache-dir "$lib" || echo "Failed to install $lib, skipping..."; \
