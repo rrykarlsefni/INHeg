@@ -27,10 +27,11 @@ RUN set -eux; \
 
 COPY handle/pyLib.txt /tmp/pyLib.txt
 
-RUN python3 -m pip install --upgrade pip setuptools wheel && \
+# Gunakan --break-system-packages agar pip bisa jalan di Debian 12+
+RUN python3 -m pip install --upgrade pip setuptools wheel --break-system-packages && \
     while IFS= read -r lib || [ -n "$lib" ]; do \
         echo "Installing $lib..." && \
-        pip install --no-cache-dir "$lib" || echo "Failed to install $lib, skipping..."; \
+        pip install --no-cache-dir "$lib" --break-system-packages || echo "Failed to install $lib, skipping..."; \
     done < /tmp/pyLib.txt && \
     rm /tmp/pyLib.txt
 
