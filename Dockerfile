@@ -11,7 +11,6 @@ ENV TZ=Asia/Jakarta \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=false
 
-# Update OS & install dependencies
 RUN set -eux; \
     apt-get update && apt-get upgrade -y; \
     apt-get install -y --no-install-recommends \
@@ -34,35 +33,27 @@ RUN set -eux; \
     chmod +x /usr/local/bin/speedtest; \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Aktifkan Corepack & Install PNPM versi spesifik (global)
-RUN corepack enable && corepack prepare pnpm@10.11.1 --activate && pnpm --version
-
-# Salin daftar library eksternal
 COPY handle/pyLib.txt /tmp/pyLib.txt
 COPY handle/phpLib.txt /tmp/phpLib.txt
 COPY handle/cLib.txt /tmp/cLib.txt
 COPY handle/goLib.txt /tmp/goLib.txt
 
-# Python Libraries
 RUN python3 -m pip install --upgrade pip setuptools wheel --break-system-packages; \
     if [ -s /tmp/pyLib.txt ]; then \
         xargs -a /tmp/pyLib.txt -r -I {} sh -c 'pip install --no-cache-dir {} --break-system-packages || echo "Gagal install python lib: {}"'; \
     fi; \
     rm -f /tmp/pyLib.txt
 
-# PHP Extensions
 RUN if [ -s /tmp/phpLib.txt ]; then \
         xargs -a /tmp/phpLib.txt -r -I {} sh -c 'yes "" | pecl install {} || echo "Gagal install php ext: {}"'; \
     fi; \
     rm -f /tmp/phpLib.txt
 
-# C Libraries
 RUN if [ -s /tmp/cLib.txt ]; then \
         xargs -a /tmp/cLib.txt -r -I {} sh -c 'apt-get install -y --no-install-recommends {} || echo "Gagal install c lib: {}"'; \
     fi; \
     rm -f /tmp/cLib.txt
 
-# Go Tools
 RUN go env -w GO111MODULE=on; \
     mkdir -p "$GOPATH"; \
     if [ -s /tmp/goLib.txt ]; then \
@@ -70,12 +61,10 @@ RUN go env -w GO111MODULE=on; \
     fi; \
     rm -f /tmp/goLib.txt
 
-# Node Global Modules
 RUN npm install -g pm2 chalk@4 fast-cli puppeteer; \
     npx puppeteer install || true; \
     chmod -R 755 /usr/local/lib/node_modules/puppeteer/.local-chromium || true
 
-# Entrypoint script
 COPY InouePoint.sh /usr/local/bin/InouePoint.sh
 RUN chmod +x /usr/local/bin/InouePoint.sh
 
@@ -83,4 +72,3 @@ USER container
 WORKDIR /home/container
 
 ENTRYPOINT ["/usr/local/bin/InouePoint.sh"]
-CMD ["pnpm", "start"]
