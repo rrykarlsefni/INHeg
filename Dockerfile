@@ -7,9 +7,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     TZ=Asia/Jakarta \
     GOPATH=/go \
-    PATH=$PATH:/usr/local/go/bin:$GOPATH/bin:/usr/local/pnpm/bin \
-    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=false \
     PNPM_HOME=/usr/local/pnpm \
+    PATH=$PATH:/usr/local/go/bin:$GOPATH/bin:$PNPM_HOME/bin \
+    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=false \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
     DEBIAN_FRONTEND=noninteractive
 
 # Install all dependencies
@@ -63,9 +64,10 @@ RUN go env -w GO111MODULE=on && \
     xargs -a /tmp/goLib.txt -I {} go install {}@latest || true && \
     rm /tmp/goLib.txt
 
-# Install pnpm 10.11.1 manually
+# Install pnpm 10.11.1 manual (overwrite jika sudah ada)
 RUN mkdir -p $PNPM_HOME && \
     curl -L https://registry.npmjs.org/pnpm/-/pnpm-10.11.1.tgz | tar -xz -C $PNPM_HOME --strip-components=1 && \
+    rm -f /usr/local/bin/pnpm && \
     ln -s $PNPM_HOME/bin/pnpm /usr/local/bin/pnpm
 
 # Puppeteer & global tools
