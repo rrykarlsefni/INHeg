@@ -7,12 +7,11 @@ ENV TZ=Asia/Jakarta \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     GOPATH=/go \
-    PNPM_HOME=/usr/local/pnpm \
-    PATH=$PATH:/usr/local/go/bin:$GOPATH/bin:$PNPM_HOME/bin \
+    PATH=$PATH:/usr/local/go/bin:$GOPATH/bin \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=false
 
-# Base tools & dependencies
+# Update OS & install dependencies
 RUN set -eux; \
     apt-get update && apt-get upgrade -y; \
     apt-get install -y --no-install-recommends \
@@ -35,50 +34,48 @@ RUN set -eux; \
     chmod +x /usr/local/bin/speedtest; \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Copy lib list
+# Aktifkan Corepack & Install PNPM versi spesifik (global)
+RUN corepack enable && corepack prepare pnpm@10.11.1 --activate && pnpm --version
+
+# Salin daftar library eksternal
 COPY handle/pyLib.txt /tmp/pyLib.txt
 COPY handle/phpLib.txt /tmp/phpLib.txt
 COPY handle/cLib.txt /tmp/cLib.txt
 COPY handle/goLib.txt /tmp/goLib.txt
 
-# Python libs
+# Python Libraries
 RUN python3 -m pip install --upgrade pip setuptools wheel --break-system-packages; \
     if [ -s /tmp/pyLib.txt ]; then \
-      xargs -a /tmp/pyLib.txt -r -I {} sh -c 'pip install --no-cache-dir {} --break-system-packages || echo "Gagal install python lib: {}"'; \
-    fi && rm -f /tmp/pyLib.txt
+        xargs -a /tmp/pyLib.txt -r -I {} sh -c 'pip install --no-cache-dir {} --break-system-packages || echo "Gagal install python lib: {}"'; \
+    fi; \
+    rm -f /tmp/pyLib.txt
 
-# PHP libs
+# PHP Extensions
 RUN if [ -s /tmp/phpLib.txt ]; then \
-      xargs -a /tmp/phpLib.txt -r -I {} sh -c 'yes "" | pecl install {} || echo "Gagal install php ext: {}"'; \
-    fi && rm -f /tmp/phpLib.txt
+        xargs -a /tmp/phpLib.txt -r -I {} sh -c 'yes "" | pecl install {} || echo "Gagal install php ext: {}"'; \
+    fi; \
+    rm -f /tmp/phpLib.txt
 
-# C libs
+# C Libraries
 RUN if [ -s /tmp/cLib.txt ]; then \
-      xargs -a /tmp/cLib.txt -r -I {} sh -c 'apt-get install -y --no-install-recommends {} || echo "Gagal install c lib: {}"'; \
-    fi && rm -f /tmp/cLib.txt
+        xargs -a /tmp/cLib.txt -r -I {} sh -c 'apt-get install -y --no-install-recommends {} || echo "Gagal install c lib: {}"'; \
+    fi; \
+    rm -f /tmp/cLib.txt
 
-# Go tools
+# Go Tools
 RUN go env -w GO111MODULE=on; \
     mkdir -p "$GOPATH"; \
     if [ -s /tmp/goLib.txt ]; then \
-      xargs -a /tmp/goLib.txt -r -I {} sh -c 'go install {}@latest || echo "Gagal install go tool: {}"'; \
-    fi && rm -f /tmp/goLib.txt
+        xargs -a /tmp/goLib.txt -r -I {} sh -c 'go install {}@latest || echo "Gagal install go tool: {}"'; \
+    fi; \
+    rm -f /tmp/goLib.txt
 
-# PNPM manual install
-RUN mkdir -p "$PNPM_HOME" && \
-    curl -L -o /tmp/pnpm.tgz https://registry.npmjs.org/pnpm/-/pnpm-10.11.1.tgz && \
-    tar -xzf /tmp/pnpm.tgz -C "$PNPM_HOME" --strip-components=1 && \
-    ln -sf "$PNPM_HOME/bin/pnpm" /usr/local/bin/pnpm && \
-    chmod -R 755 "$PNPM_HOME" && \
-    rm -f /tmp/pnpm.tgz && \
-    if command -v pnpm; then pnpm --version; else echo "PNPM tidak ditemukan di PATH"; exit 127; fi
-
-# Global node modules
-RUN npm install -g pm2 chalk@4 fast-cli puppeteer && \
-    npx puppeteer install || true && \
+# Node Global Modules
+RUN npm install -g pm2 chalk@4 fast-cli puppeteer; \
+    npx puppeteer install || true; \
     chmod -R 755 /usr/local/lib/node_modules/puppeteer/.local-chromium || true
 
-# Startup script
+# Entrypoint script
 COPY InouePoint.sh /usr/local/bin/InouePoint.sh
 RUN chmod +x /usr/local/bin/InouePoint.sh
 
