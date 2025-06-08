@@ -1,4 +1,4 @@
-#tolong jangan di ambil:)
+#tolong jangan di ambil, punya InoueHost:)
 FROM ghcr.io/parkervcp/yolks:nodejs_24
 
 USER root
@@ -71,8 +71,14 @@ RUN go env -w GO111MODULE=on && \
         go install "$lib@latest" || echo "Failed Go: $lib"; \
     done < /tmp/goLib.txt && rm /tmp/goLib.txt
 
-# Install NodeJS Global Tools
-RUN npm install -g chalk@4 fast-cli@2.1.0 pm2 pnpm puppeteer && \
+# Enable Corepack and install NodeJS Global Tools
+RUN corepack enable && \
+    npm install -g \
+    chalk@4 \
+    fast-cli@2.1.0 \
+    pm2 \
+    pnpm \
+    puppeteer && \
     chmod -R 755 /usr/local/lib/node_modules/fast-cli/node_modules/puppeteer/.local-chromium || true
 
 # Set container user & working dir
