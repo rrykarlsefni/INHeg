@@ -1,36 +1,48 @@
 #!/bin/bash
 set -e
+cd /home/container
 
-WORKDIR="/home/container"
-cd "$WORKDIR"
+cyan='\033[0;36m'
+green='\033[0;32m'
+yellow='\033[1;33m'
+magenta='\033[0;35m'
+bold='\033[1m'
+reset='\033[0m'
 
-echo "[InouePoint.sh] Starting container..."
+# Info
+now=$(date +"%Y-%m-%d %H:%M:%S")
+hostname=$(hostname)
+ip_masked="***.***.***.***"
+cpu=$(grep -m 1 "model name" /proc/cpuinfo | cut -d ':' -f2 | sed 's/^ //')
+ram=$(free -h | awk '/Mem:/ {print $3 "/" $2}')
 
-if [ -f pnpm-lock.yaml ]; then
-  echo "[InouePoint.sh] Detected pnpm-lock.yaml, menggunakan pnpm"
-  INSTALL_CMD="pnpm install"
-  START_CMD="pnpm start"
-elif [ -f package-lock.json ]; then
-  echo "[InouePoint.sh] Detected package-lock.json, menggunakan npm"
-  INSTALL_CMD="npm install"
-  START_CMD="npm start"
-elif [ -f yarn.lock ]; then
-  echo "[InouePoint.sh] Detected yarn.lock, menggunakan yarn"
-  INSTALL_CMD="yarn install"
-  START_CMD="yarn start"
-else
-  echo "[InouePoint.sh] Tidak menemukan lockfile, menggunakan npm default"
-  INSTALL_CMD="npm install"
-  START_CMD="npm start"
-fi
+# Header
+echo -e "${cyan}╭────────────────────────────────────────────╮${reset}"
+echo -e "${cyan}│${green}  🚀 InoueHost Container Launcher       ${cyan}│${reset}"
+echo -e "${cyan}╰────────────────────────────────────────────╯${reset}"
 
-echo "[InouePoint.sh] Menjalankan: $INSTALL_CMD"
-eval "$INSTALL_CMD"
+# Detail Info
+echo -e "${yellow}📂 Working Dir   :${reset} /home/container"
+echo -e "${yellow}💻 Start Command :${reset} $*"
+echo -e "${yellow}🕒 Waktu VPS     :${reset} $now"
+echo -e "${yellow}🖥️  Hostname       :${reset} $hostname"
+echo -e "${yellow}🌐 IP Publik     :${reset} $ip_masked"
+echo -e "${yellow}🧠 RAM Digunakan :${reset} $ram"
+echo -e "${yellow}🧮 CPU Info      :${reset} $cpu"
+echo
 
-if [ "$#" -gt 0 ]; then
-  echo "[InouePoint.sh] Menjalankan perintah custom: $*"
-  exec "$@"
-else
-  echo "[InouePoint.sh] Menjalankan start script: $START_CMD"
-  exec $START_CMD
-fi
+# Simple loading animation
+spinner="/-\|"
+echo -ne "${magenta}🔄 Menyiapkan container..."
+for i in {1..8}; do
+  i=$(( (i+1) %4 ))
+  printf "\b${spinner:$i:1}"
+  sleep 0.1
+done
+echo -e "\b Done!${reset}"
+
+# Footer
+echo -e "${green}Terima kasih telah menggunakan InoueHost${reset}"
+echo
+
+exec "$@"
