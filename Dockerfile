@@ -72,3 +72,4 @@ USER container
 WORKDIR /home/container
 
 ENTRYPOINT ["/usr/local/bin/InouePoint.sh"]
+CMD ["npm", "start"]
