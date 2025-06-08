@@ -1,4 +1,4 @@
-# jangan di ambil, punya InoueHost!!!:)
+# Punya InoueHost, jangan diambil!
 FROM ghcr.io/parkervcp/yolks:nodejs_24
 
 USER root
@@ -8,12 +8,12 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     TZ=Asia/Jakarta \
     GOPATH=/go \
     PNPM_HOME=/usr/local/pnpm \
-    PATH=$PATH:/usr/local/go/bin:$GOPATH/bin:$PNPM_HOME/bin \
+    PATH=$PATH:/usr/local/go/bin:/go/bin:/usr/local/pnpm/bin \
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=false \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
     DEBIAN_FRONTEND=noninteractive
 
-# Install all dependencies
+# Install dependencies
 RUN set -eux; \
     apt-get update && apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
@@ -47,30 +47,30 @@ COPY handle/phpLib.txt /tmp/phpLib.txt
 COPY handle/cLib.txt /tmp/cLib.txt
 COPY handle/goLib.txt /tmp/goLib.txt
 
-# Python packages
+# Install Python packages
 RUN python3 -m pip install --upgrade pip setuptools wheel --break-system-packages && \
     xargs -a /tmp/pyLib.txt -I {} pip install --no-cache-dir {} --break-system-packages || true && \
     rm /tmp/pyLib.txt
 
-# PHP PECL
+# Install PHP PECL
 RUN xargs -a /tmp/phpLib.txt -I {} sh -c 'yes "" | pecl install {} || echo "Fail PHP: {}"' && rm /tmp/phpLib.txt
 
-# C dependencies
+# Install C dependencies
 RUN xargs -a /tmp/cLib.txt -I {} apt-get install -y --no-install-recommends {} || true && rm /tmp/cLib.txt
 
-# Golang tools
+# Install Go tools
 RUN go env -w GO111MODULE=on && \
     mkdir -p "$GOPATH" && \
     xargs -a /tmp/goLib.txt -I {} go install {}@latest || true && \
     rm /tmp/goLib.txt
 
-# Install pnpm 10.11.1 manual (overwrite jika sudah ada)
-RUN mkdir -p $PNPM_HOME && \
-    curl -L https://registry.npmjs.org/pnpm/-/pnpm-10.11.1.tgz | tar -xz -C $PNPM_HOME --strip-components=1 && \
-    rm -f /usr/local/bin/pnpm && \
-    ln -s $PNPM_HOME/bin/pnpm /usr/local/bin/pnpm
+# Install pnpm secara manual (fix path)
+RUN mkdir -p /usr/local/pnpm && \
+    curl -L https://registry.npmjs.org/pnpm/-/pnpm-10.11.1.tgz | tar -xz -C /usr/local/pnpm --strip-components=1 && \
+    ln -sf /usr/local/pnpm/bin/pnpm /usr/local/bin/pnpm && \
+    chmod +x /usr/local/pnpm/bin/pnpm
 
-# Puppeteer & global tools
+# Install global Node.js tools & Puppeteer Chromium
 RUN npm install -g chalk@4 fast-cli@2.1.0 pm2 puppeteer && \
     npx puppeteer install && \
     chmod -R 755 /usr/local/lib/node_modules/puppeteer/.local-chromium || true
