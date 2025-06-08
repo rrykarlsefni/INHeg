@@ -67,10 +67,5 @@ RUN npm install -g pm2 chalk@4 fast-cli puppeteer; \
     npx puppeteer install || true; \
     chmod -R 755 /usr/local/lib/node_modules/puppeteer/.local-chromium || true
 
-# Tambahkan script banner
-COPY entry/inoue-welcome.sh /etc/profile.d/inoue-welcome.sh
-COPY entry/welcome.txt /etc/motd
-RUN chmod +x /etc/profile.d/inoue-welcome.sh /etc/motd
-
 USER container
 WORKDIR /home/container
