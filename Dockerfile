@@ -37,7 +37,7 @@ RUN set -eux; \
     chmod +x /usr/local/bin/speedtest; \
     apt-get clean; rm -rf /var/lib/apt/lists/*
 
-# Copy dependency lists
+# Copy dependency lists (biarkan ada)
 COPY handle/pyLib.txt /tmp/pyLib.txt
 COPY handle/phpLib.txt /tmp/phpLib.txt
 COPY handle/cLib.txt /tmp/cLib.txt
@@ -74,7 +74,7 @@ RUN set -eux; \
     fi; \
     rm -f /tmp/goLib.txt
 
-# Install pnpm 10.11.1 manual with verification
+# Install pnpm 10.11.1 manual
 RUN set -eux; \
     mkdir -p "$PNPM_HOME"; \
     curl -L -o /tmp/pnpm.tgz https://registry.npmjs.org/pnpm/-/pnpm-10.11.1.tgz; \
@@ -91,5 +91,12 @@ RUN set -eux; \
     npx puppeteer install; \
     chmod -R 755 /usr/local/lib/node_modules/puppeteer/.local-chromium || true
 
+# Copy InouePoint.sh dan beri permission executable
+COPY InouePoint.sh /usr/local/bin/InouePoint.sh
+RUN chmod +x /usr/local/bin/InouePoint.sh
+
 USER container
 WORKDIR /home/container
+
+ENTRYPOINT ["/usr/local/bin/InouePoint.sh"]
+CMD ["pnpm", "start"]
