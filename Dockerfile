@@ -58,10 +58,11 @@ RUN set -eux; \
     fi; \
     rm -f /tmp/phpLib.txt
 
-# C dependencies install
+# C dependencies install (perbaikan: update dulu)
 RUN set -eux; \
+    apt-get update; \
     if [ -s /tmp/cLib.txt ]; then \
-      xargs -a /tmp/cLib.txt -r -I {} apt-get install -y --no-install-recommends {}; \
+      grep -v '^\s*$' /tmp/cLib.txt | grep -v '^#' | xargs -r -I {} apt-get install -y --no-install-recommends {}; \
     fi; \
     rm -f /tmp/cLib.txt
 
