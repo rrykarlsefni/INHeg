@@ -1,0 +1,7 @@
+libcurl4-openssl-dev
+libssl-dev
+libmagic-dev
+libjpeg-dev
+libpng-dev
+libfreetype6-dev
+zlib1g-dev

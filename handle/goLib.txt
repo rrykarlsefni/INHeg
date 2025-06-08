@@ -1,0 +1,9 @@
+github.com/projectdiscovery/httpx/cmd/httpx@latest
+github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
+github.com/tomnomnom/waybackurls@latest
+github.com/tomnomnom/assetfinder@latest
+github.com/jaeles-project/gospider@latest
+github.com/OWASP/Amass/v3/...@master
+golang.org/x/net/html@latest
+golang.org/x/text@latest
+golang.org/x/tools/cmd/goimports@latest

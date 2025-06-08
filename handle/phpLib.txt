@@ -1,0 +1,7 @@
+redis
+mongodb
+imagick
+protobuf
+swoole
+xdebug
+yaml
