@@ -1,4 +1,5 @@
-# tolong jangan di ambil, punya InoueHost:)
+# Dockerfile InoueHost Updated with pnpm permanent install
+
 FROM ghcr.io/parkervcp/yolks:nodejs_24
 
 USER root
@@ -63,9 +64,10 @@ RUN go env -w GO111MODULE=on && \
     xargs -a /tmp/goLib.txt -I {} go install {}@latest || true && \
     rm /tmp/goLib.txt
 
-# Enable corepack and install global Node.js tools
+# Enable corepack and install global Node.js tools with pnpm pre-installed
 RUN corepack enable && \
-    npm install -g chalk@4 fast-cli@2.1.0 pm2 pnpm puppeteer && \
+    corepack prepare pnpm@latest --activate && \
+    npm install -g chalk@4 fast-cli@2.1.0 pm2 puppeteer && \
     npx puppeteer install && \
     chmod -R 755 /usr/local/lib/node_modules/puppeteer/.local-chromium || true
 
