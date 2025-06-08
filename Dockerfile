@@ -1,5 +1,4 @@
-# Dockerfile InoueHost Updated with pnpm permanent install
-
+# jangan di ambil, punya InoueHost!!!:)
 FROM ghcr.io/parkervcp/yolks:nodejs_24
 
 USER root
@@ -8,13 +7,15 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     TZ=Asia/Jakarta \
     GOPATH=/go \
-    PATH=$PATH:/usr/local/go/bin:$GOPATH/bin \
-    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=false
+    PATH=$PATH:/usr/local/go/bin:$GOPATH/bin:/usr/local/pnpm/bin \
+    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=false \
+    PNPM_HOME=/usr/local/pnpm \
+    DEBIAN_FRONTEND=noninteractive
 
-# Install OS packages + speedtest + cleanup
+# Install all dependencies
 RUN set -eux; \
     apt-get update && apt-get upgrade -y && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    apt-get install -y --no-install-recommends \
         ffmpeg \
         python3 python3-pip python-is-python3 \
         php php-cli php-pear php-dev \
@@ -32,45 +33,45 @@ RUN set -eux; \
         ca-certificates tzdata \
         libsm6 libxext6 libxrender-dev libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxdamage1 libxrandr2 libgbm1 libasound2 libpangocairo-1.0-0 \
         tesseract-ocr imagemagick \
-        chromium \
-    && curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | bash && \
+        chromium && \
+    curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | bash && \
     apt-get update && apt-get install -y speedtest && \
     printf '#!/bin/bash\nexec /usr/bin/speedtest --accept-license --accept-gdpr "$@"\n' > /usr/local/bin/speedtest && \
     chmod +x /usr/local/bin/speedtest && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Copy dependency lists
+# Copy package list
 COPY handle/pyLib.txt /tmp/pyLib.txt
 COPY handle/phpLib.txt /tmp/phpLib.txt
 COPY handle/cLib.txt /tmp/cLib.txt
 COPY handle/goLib.txt /tmp/goLib.txt
 
-# Install Python libraries with pip
+# Python packages
 RUN python3 -m pip install --upgrade pip setuptools wheel --break-system-packages && \
     xargs -a /tmp/pyLib.txt -I {} pip install --no-cache-dir {} --break-system-packages || true && \
     rm /tmp/pyLib.txt
 
-# Install PHP extensions via PECL
-RUN xargs -a /tmp/phpLib.txt -I {} sh -c 'yes "" | pecl install {} || echo "Failed PHP: {}"' && \
-    rm /tmp/phpLib.txt
+# PHP PECL
+RUN xargs -a /tmp/phpLib.txt -I {} sh -c 'yes "" | pecl install {} || echo "Fail PHP: {}"' && rm /tmp/phpLib.txt
 
-# Install C/C++ dev libs via apt
-RUN xargs -a /tmp/cLib.txt -I {} apt-get install -y --no-install-recommends {} || true && \
-    rm /tmp/cLib.txt
+# C dependencies
+RUN xargs -a /tmp/cLib.txt -I {} apt-get install -y --no-install-recommends {} || true && rm /tmp/cLib.txt
 
-# Install Go packages
+# Golang tools
 RUN go env -w GO111MODULE=on && \
     mkdir -p "$GOPATH" && \
     xargs -a /tmp/goLib.txt -I {} go install {}@latest || true && \
     rm /tmp/goLib.txt
 
-# Enable corepack and install global Node.js tools with pnpm pre-installed
-RUN corepack enable && \
-    corepack prepare pnpm@latest --activate && \
-    npm install -g chalk@4 fast-cli@2.1.0 pm2 puppeteer && \
+# Install pnpm 10.11.1 manually
+RUN mkdir -p $PNPM_HOME && \
+    curl -L https://registry.npmjs.org/pnpm/-/pnpm-10.11.1.tgz | tar -xz -C $PNPM_HOME --strip-components=1 && \
+    ln -s $PNPM_HOME/bin/pnpm /usr/local/bin/pnpm
+
+# Puppeteer & global tools
+RUN npm install -g chalk@4 fast-cli@2.1.0 pm2 puppeteer && \
     npx puppeteer install && \
     chmod -R 755 /usr/local/lib/node_modules/puppeteer/.local-chromium || true
 
-# Switch to non-root user for runtime
 USER container
 WORKDIR /home/container
