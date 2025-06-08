@@ -11,6 +11,7 @@ ENV TZ=Asia/Jakarta \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=false
 
+# Install dependencies
 RUN set -eux; \
     apt-get update && apt-get upgrade -y; \
     apt-get install -y --no-install-recommends \
@@ -33,6 +34,7 @@ RUN set -eux; \
     chmod +x /usr/local/bin/speedtest; \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Install Python, PHP, C, Go libraries
 COPY handle/pyLib.txt /tmp/pyLib.txt
 COPY handle/phpLib.txt /tmp/phpLib.txt
 COPY handle/cLib.txt /tmp/cLib.txt
@@ -65,11 +67,10 @@ RUN npm install -g pm2 chalk@4 fast-cli puppeteer; \
     npx puppeteer install || true; \
     chmod -R 755 /usr/local/lib/node_modules/puppeteer/.local-chromium || true
 
-COPY InouePoint.sh /usr/local/bin/InouePoint.sh
-RUN chmod +x /usr/local/bin/InouePoint.sh
+# Tambahkan script banner
+COPY entry/inoue-welcome.sh /etc/profile.d/inoue-welcome.sh
+COPY entry/welcome.txt /etc/motd
+RUN chmod +x /etc/profile.d/inoue-welcome.sh /etc/motd
 
 USER container
 WORKDIR /home/container
-
-ENTRYPOINT ["/usr/local/bin/InouePoint.sh"]
-CMD ["npm", "start"]
