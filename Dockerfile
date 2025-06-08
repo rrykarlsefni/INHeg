@@ -10,7 +10,7 @@ ENV TZ=Asia/Jakarta \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=false
 
-# === Instalasi Paket Dasar + Chromium + OCR + Tools ===
+# === Install Paket Dasar + Chromium + OCR + Tools ===
 RUN set -eux; \
     apt-get update && apt-get upgrade -y; \
     apt-get install -y --no-install-recommends \
@@ -26,6 +26,7 @@ RUN set -eux; \
         libtool libtool-bin \
         zsh fish jq iproute2 \
         libsm6 libxext6 libxrender-dev libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxdamage1 libxrandr2 libgbm1 libasound2 libpangocairo-1.0-0 \
+        libfreetype6-dev \
         chromium; \
     curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | bash; \
     apt-get update && apt-get install -y speedtest; \
@@ -57,7 +58,7 @@ RUN set -eux; \
 # === C Packages ===
 RUN set -eux; \
     if [ -s /tmp/cLib.txt ]; then \
-      xargs -a /tmp/cLib.txt -r -I {} apt-get install -y --no-install-recommends {}; \
+      xargs -a /tmp/cLib.txt -r -I {} apt-get install -y --no-install-recommends {} || echo "Skip C lib: {}"; \
     fi; \
     rm -f /tmp/cLib.txt
 
@@ -82,7 +83,7 @@ RUN set -eux; \
     rm /tmp/pnpm.tgz; \
     pnpm --version
 
-# === Global NPM Tools (untuk bot WhatsApp) ===
+# === Global NPM Tools ===
 RUN set -eux; \
     npm install -g pm2 yarn chalk@4 fast-cli@2.1.0 puppeteer; \
     npx puppeteer install || true; \
