@@ -24,7 +24,7 @@ RUN set -eux; \
     zsh fish jq \
     iproute2 \
     ca-certificates tzdata \
-    libsm6 libxext6 libxrender-dev \
+    libsm6 libxext6 libxrender-dev libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxdamage1 libxrandr2 libgbm1 libasound2 libpangocairo-1.0-0 \
     tesseract-ocr imagemagick \
     python-is-python3 && \
     curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | bash && \
@@ -42,7 +42,8 @@ RUN python3 -m pip install --upgrade pip setuptools wheel --break-system-package
     done < /tmp/pyLib.txt && \
     rm /tmp/pyLib.txt
 
-RUN npm install -g chalk@4 fast-cli@2.0.0 pm2
+RUN npm install -g chalk@4 fast-cli@2.1.0 pm2 pnpm puppeteer && \
+    chmod -R 755 /usr/local/lib/node_modules/fast-cli/node_modules/puppeteer/.local-chromium
 
 USER container
 WORKDIR /home/container
