@@ -72,6 +72,10 @@ RUN npm install -g pm2 chalk@4 fast-cli puppeteer; \
     npx puppeteer install || true; \
     chmod -R 755 /usr/local/lib/node_modules/puppeteer/.local-chromium || true
 
+# Plawright
+RUN npm install -g playwright && \
+    npx playwright install chromium
+
 # Cek semua tool dan lib saat build
 COPY --chown=container:container handle/check-libs.sh /usr/local/bin/check-libs
 RUN chmod +x /usr/local/bin/check-libs
